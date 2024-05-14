@@ -33,7 +33,8 @@ class User(Model):
 class UserModel(BaseModel):
     id: str
     name: str
-    email: str
+    email: str = ""
+    phone: str
     role: str = "pending"
     profile_image_url: str
 
@@ -156,13 +157,30 @@ class UsersTable:
 
     def update_user_last_active_by_id(self, id: str) -> Optional[UserModel]:
         try:
+            # 构建更新用户最后活跃时间的查询
             query = User.update(last_active_at=int(time.time())).where(User.id == id)
+            
+            # 执行更新操作
             query.execute()
 
+            # 获取更新后的用户信息
             user = User.get(User.id == id)
+            
+            # 将用户信息转换为 UserModel 对象并返回
             return UserModel(**model_to_dict(user))
         except:
+            # 捕获任何异常并返回 None
             return None
+
+    # def update_user_last_active_by_id(self, id: str) -> Optional[UserModel]:
+    #     try:
+    #         query = User.update(last_active_at=int(time.time())).where(User.id == id)
+    #         query.execute()
+
+    #         user = User.get(User.id == id)
+    #         return UserModel(**model_to_dict(user))
+    #     except:
+    #         return None
 
     def update_user_by_id(self, id: str, updated: dict) -> Optional[UserModel]:
         try:

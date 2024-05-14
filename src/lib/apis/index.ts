@@ -3,6 +3,7 @@ import { WEBUI_BASE_URL } from '$lib/constants';
 export const getBackendConfig = async () => {
 	let error = null;
 
+	//console.log("WEBUI_BASE_URL:" + WEBUI_BASE_URL)
 	const res = await fetch(`${WEBUI_BASE_URL}/api/config`, {
 		method: 'GET',
 		headers: {

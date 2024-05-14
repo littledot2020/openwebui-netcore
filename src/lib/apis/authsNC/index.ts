@@ -4,7 +4,7 @@ import { WEBUI_BASEAPI_BASE_URL } from '$lib/constants';//[c#]
 export const getSessionUser = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/auth`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -28,17 +28,17 @@ export const getSessionUser = async (token: string) => {
 	return res;
 };
 
-export const userSignIn = async (email: string, password: string) => {
+export const userSignIn = async (phone: string, password: string) => {
 	let error = null;
 
 	//[c#]WEBUI_API_BASE_URL WEBUI_BASEAPI_BASE_URL
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signin`, {	
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signin`, {	
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			email: email,
+			phone: phone,
 			password: password
 		})
 	})
@@ -62,20 +62,20 @@ export const userSignIn = async (email: string, password: string) => {
 
 export const userSignUp = async (
 	name: string,
-	email: string,
+	phone: string,
 	password: string,
 	profile_image_url: string
 ) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signup`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signup`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
 			name: name,
-			email: email,
+			phone: phone,
 			password: password,
 			profile_image_url: profile_image_url
 		})
@@ -100,13 +100,13 @@ export const userSignUp = async (
 export const addUser = async (
 	token: string,
 	name: string,
-	email: string,
+	phone: string,
 	password: string,
 	role: string = 'pending'
 ) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/add`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/add`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ export const addUser = async (
 		},
 		body: JSON.stringify({
 			name: name,
-			email: email,
+			phone: phone,
 			password: password,
 			role: role
 		})
@@ -139,7 +139,7 @@ export const addUser = async (
 export const updateUserProfile = async (token: string, name: string, profileImageUrl: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/update/profile`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/update/profile`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export const updateUserProfile = async (token: string, name: string, profileImag
 export const updateUserPassword = async (token: string, password: string, newPassword: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/update/password`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/update/password`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export const updateUserPassword = async (token: string, password: string, newPas
 export const getSignUpEnabledStatus = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signup/enabled`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signup/enabled`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -228,7 +228,7 @@ export const getSignUpEnabledStatus = async (token: string) => {
 export const getDefaultUserRole = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signup/user/role`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signup/user/role`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ export const getDefaultUserRole = async (token: string) => {
 export const updateDefaultUserRole = async (token: string, role: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signup/user/role`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signup/user/role`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ export const updateDefaultUserRole = async (token: string, role: string) => {
 export const toggleSignUpEnabledStatus = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signup/enabled/toggle`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/signup/enabled/toggle`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -312,7 +312,7 @@ export const toggleSignUpEnabledStatus = async (token: string) => {
 export const getJWTExpiresDuration = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/token/expires`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/token/expires`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ export const getJWTExpiresDuration = async (token: string) => {
 export const updateJWTExpiresDuration = async (token: string, duration: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/token/expires/update`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/token/expires/update`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -369,7 +369,7 @@ export const updateJWTExpiresDuration = async (token: string, duration: string) 
 export const createAPIKey = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/api_key`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/api_key`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -394,7 +394,7 @@ export const createAPIKey = async (token: string) => {
 export const getAPIKey = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/api_key`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/api_key`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -419,7 +419,7 @@ export const getAPIKey = async (token: string) => {
 export const deleteAPIKey = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/api_key`, {
+	const res = await fetch(`${WEBUI_BASEAPI_BASE_URL}/auths/api_key`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',

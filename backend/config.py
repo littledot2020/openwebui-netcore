@@ -70,9 +70,9 @@ try:
 except ImportError:
     log.warning("dotenv not installed, skipping...")
 
-WEBUI_NAME = os.environ.get("WEBUI_NAME", "Open WebUI")
-if WEBUI_NAME != "Open WebUI":
-    WEBUI_NAME += " (Open WebUI)"
+WEBUI_NAME = os.environ.get("WEBUI_NAME", "AI智学室")
+if WEBUI_NAME != "AI智学室":
+    WEBUI_NAME += " (AI智学室)"
 
 WEBUI_FAVICON_URL = "https://openwebui.com/favicon.png"
 
@@ -199,6 +199,7 @@ if CUSTOM_NAME:
                         shutil.copyfileobj(r.raw, f)
 
             WEBUI_NAME = data["name"]
+            log.info(f"data[name]: {data['name']}")
     except Exception as e:
         log.exception(e)
         pass
@@ -302,7 +303,24 @@ OLLAMA_BASE_URLS = [url.strip() for url in OLLAMA_BASE_URLS.split(";")]
 # OPENAI_API
 ####################################
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+# 代理服务器的地址和端口
+LOCAL_PROXY = os.getenv("https_proxy", "http://192.168.1.2:10809")
+
+# 从环境变量中获取代理服务器地址和端口，如果不存在则默认使用指定的地址和端口
+_http_proxy = os.getenv("http_proxy", "http://192.168.1.2:10809")
+_https_proxy = os.getenv("https_proxy", "http://192.168.1.2:10809")
+
+# 构建代理服务器字典
+LOCAL_PROXYS = {
+    'http': _http_proxy,
+    'https': _https_proxy
+}
+
+
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")    ##--## KEY
+log.info(f"________OPENAI_API_KEY________: {OPENAI_API_KEY}")
+
 OPENAI_API_BASE_URL = os.environ.get("OPENAI_API_BASE_URL", "")
 
 
@@ -311,6 +329,7 @@ if OPENAI_API_BASE_URL == "":
 
 OPENAI_API_KEYS = os.environ.get("OPENAI_API_KEYS", "")
 OPENAI_API_KEYS = OPENAI_API_KEYS if OPENAI_API_KEYS != "" else OPENAI_API_KEY
+log.info(f"________OPENAI_API_KEYS: {OPENAI_API_KEYS}")
 
 OPENAI_API_KEYS = [url.strip() for url in OPENAI_API_KEYS.split(";")]
 
@@ -325,7 +344,7 @@ OPENAI_API_BASE_URLS = [
     for url in OPENAI_API_BASE_URLS.split(";")
 ]
 
-OPENAI_API_KEY = ""
+#OPENAI_API_KEY = ""
 
 try:
     OPENAI_API_KEY = OPENAI_API_KEYS[
@@ -342,7 +361,8 @@ OPENAI_API_BASE_URL = "https://api.openai.com/v1"
 ####################################
 
 ENABLE_SIGNUP = os.environ.get("ENABLE_SIGNUP", "True").lower() == "true"
-DEFAULT_MODELS = os.environ.get("DEFAULT_MODELS", None)
+# DEFAULT_MODELS = os.environ.get("DEFAULT_MODELS", None)
+DEFAULT_MODELS = os.environ.get("DEFAULT_MODELS", "gpt-4-vision-preview")
 
 
 DEFAULT_PROMPT_SUGGESTIONS = (
@@ -352,33 +372,61 @@ DEFAULT_PROMPT_SUGGESTIONS = (
     and type(CONFIG_DATA["ui"]["prompt_suggestions"]) is list
     else [
         {
-            "title": ["Help me study", "vocabulary for a college entrance exam"],
-            "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
+            "title": ["帮助我学习", "为大学入学考试准备词汇"],
+            "content": "帮助我学习词汇：给我写一个句子，让我填空，我会尝试选择正确的选项。"
         },
         {
-            "title": ["Give me ideas", "for what to do with my kids' art"],
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
+            "title": ["给我一些想法", "如何处理孩子的艺术作品"],
+            "content": "我能用孩子的艺术作品做哪些有创意的事情？我不想把它们扔掉，但也不想让它们占据太多空间。"
         },
         {
-            "title": ["Tell me a fun fact", "about the Roman Empire"],
-            "content": "Tell me a random fun fact about the Roman Empire",
+            "title": ["告诉我一个有趣的事实", "关于罗马帝国"],
+            "content": "告诉我一个关于罗马帝国的随机有趣事实。"
         },
         {
-            "title": ["Show me a code snippet", "of a website's sticky header"],
-            "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
+            "title": ["展示一个网站粘性标题的代码片段"],
+            "content": "展示一个网站粘性标题的 CSS 和 JavaScript 代码片段。"
         },
         {
-            "title": [
-                "Explain options trading",
-                "if I'm familiar with buying and selling stocks",
-            ],
-            "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
+            "title": ["解释期权交易", "如果我熟悉买卖股票"],
+            "content": "如果我熟悉买卖股票，用简单的语言解释期权交易。"
         },
         {
-            "title": ["Overcome procrastination", "give me tips"],
-            "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
-        },
+            "title": ["克服拖延症", "给我一些建议"],
+            "content": "你能先问我我最经常拖延的时候，然后给我一些建议来克服拖延吗？"
+        }
     ]
+    
+    
+    # else [
+    #     {
+    #         "title": ["Help me study", "vocabulary for a college entrance exam"],
+    #         "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
+    #     },
+    #     {
+    #         "title": ["Give me ideas", "for what to do with my kids' art"],
+    #         "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
+    #     },
+    #     {
+    #         "title": ["Tell me a fun fact", "about the Roman Empire"],
+    #         "content": "Tell me a random fun fact about the Roman Empire",
+    #     },
+    #     {
+    #         "title": ["Show me a code snippet", "of a website's sticky header"],
+    #         "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
+    #     },
+    #     {
+    #         "title": [
+    #             "Explain options trading",
+    #             "if I'm familiar with buying and selling stocks",
+    #         ],
+    #         "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
+    #     },
+    #     {
+    #         "title": ["Overcome procrastination", "give me tips"],
+    #         "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
+    #     },
+    # ]
 )
 
 
@@ -420,9 +468,11 @@ WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get(
 WEBUI_SECRET_KEY = os.environ.get(
     "WEBUI_SECRET_KEY",
     os.environ.get(
-        "WEBUI_JWT_SECRET_KEY", "t0p-s3cr3t"
+        "WEBUI_JWT_SECRET_KEY", "qP1yR9qH2xS0Vw2lA3gI4nF0zA7fA3hB"
     ),  # DEPRECATED: remove at next major version
 )
+
+log.info(f"WEBUI_JWT_SECRET_KEY: {WEBUI_SECRET_KEY}")
 
 if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
     raise ValueError(ERROR_MESSAGES.ENV_VAR_NOT_FOUND)
@@ -452,6 +502,10 @@ RAG_RELEVANCE_THRESHOLD = float(os.environ.get("RAG_RELEVANCE_THRESHOLD", "0.0")
 
 ENABLE_RAG_HYBRID_SEARCH = (
     os.environ.get("ENABLE_RAG_HYBRID_SEARCH", "").lower() == "true"
+)
+
+ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
+    os.environ.get("ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION", "True").lower() == "true"
 )
 
 RAG_EMBEDDING_ENGINE = os.environ.get("RAG_EMBEDDING_ENGINE", "")
@@ -582,10 +636,12 @@ AUDIO_OPENAI_API_KEY = os.getenv("AUDIO_OPENAI_API_KEY", OPENAI_API_KEY)
 
 ENABLE_LITELLM = os.environ.get("ENABLE_LITELLM", "True").lower() == "true"
 
-LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14365"))
+LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14366"))
+# LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14365"))
 if LITELLM_PROXY_PORT < 0 or LITELLM_PROXY_PORT > 65535:
     raise ValueError("Invalid port number for LITELLM_PROXY_PORT")
 LITELLM_PROXY_HOST = os.getenv("LITELLM_PROXY_HOST", "127.0.0.1")
+# LITELLM_PROXY_HOST = os.getenv("LITELLM_PROXY_HOST", "127.0.0.1")
 
 
 ####################################

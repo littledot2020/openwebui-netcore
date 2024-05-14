@@ -139,7 +139,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()

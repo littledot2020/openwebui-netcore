@@ -1,3 +1,4 @@
+import traceback
 from fastapi import FastAPI, Request, Response, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
@@ -26,6 +27,8 @@ from config import (
     CACHE_DIR,
     ENABLE_MODEL_FILTER,
     MODEL_FILTER_LIST,
+    LOCAL_PROXY,
+    LOCAL_PROXYS,
 )
 from typing import List, Optional
 
@@ -141,7 +144,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
         except Exception as e:
             log.exception(e)
-            error_detail = "Open WebUI: Server Connection Error"
+            error_detail = "ToolAI: Server Connection Error"
             if r is not None:
                 try:
                     res = r.json()
@@ -159,19 +162,22 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
 
 async def fetch_url(url, key):
+
+    ## log.info(f'fetch_url: {url} key: {key}')
     try:
         headers = {"Authorization": f"Bearer {key}"}
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, proxy=LOCAL_PROXY) as response:
                 return await response.json()
     except Exception as e:
         # Handle connection error here
         log.error(f"Connection error: {e}")
+        log.error(traceback.format_exc())
         return None
 
 
 def merge_models_lists(model_lists):
-    log.info(f"merge_models_lists {model_lists}")
+    # log.info(f"merge_models_lists {model_lists}")
     merged_list = []
 
     for idx, models in enumerate(model_lists):
@@ -189,19 +195,18 @@ def merge_models_lists(model_lists):
 
 
 async def get_all_models():
-    log.info("get_all_models()")
-
     if len(app.state.OPENAI_API_KEYS) == 1 and app.state.OPENAI_API_KEYS[0] == "":
         models = {"data": []}
     else:
+        
         tasks = [
             fetch_url(f"{url}/models", app.state.OPENAI_API_KEYS[idx])
             for idx, url in enumerate(app.state.OPENAI_API_BASE_URLS)
         ]
 
         responses = await asyncio.gather(*tasks)
-        log.info(f"get_all_models:responses() {responses}")
 
+        # 根据 models 返回的结果判断是否需要赋值为 JSON1 的内容
         models = {
             "data": merge_models_lists(
                 list(
@@ -217,7 +222,6 @@ async def get_all_models():
             )
         }
 
-        log.info(f"models: {models}")
         app.state.MODELS = {model["id"]: model for model in models["data"]}
 
         return models
@@ -256,7 +260,7 @@ async def get_models(url_idx: Optional[int] = None, user=Depends(get_current_use
             return response_data
         except Exception as e:
             log.exception(e)
-            error_detail = "Open WebUI: Server Connection Error"
+            error_detail = "ToolAI: Server Connection Error"
             if r is not None:
                 try:
                     res = r.json()
@@ -324,6 +328,7 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
             data=body,
             headers=headers,
             stream=True,
+            proxies=LOCAL_PROXYS,
         )
 
         r.raise_for_status()
@@ -340,7 +345,7 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
             return response_data
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()

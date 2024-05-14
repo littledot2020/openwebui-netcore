@@ -161,14 +161,20 @@ async def get_all_models():
     return models
 
 
+# 这是一个 FastAPI 端点，用于获取 Ollama 标签，可以获取所有模型的标签或特定 URL 索引的标签。
+# 端点有两个路由：/api/tags 和 /api/tags/{url_idx}。
+# 该函数需要使用 get_current_user 依赖项进行身份验证。
+
 @app.get("/api/tags")
 @app.get("/api/tags/{url_idx}")
 async def get_ollama_tags(
     url_idx: Optional[int] = None, user=Depends(get_current_user)
 ):
     if url_idx == None:
+        # 获取所有模型
         models = await get_all_models()
 
+        # 根据用户角色和模型过滤列表（如果启用）过滤模型
         if app.state.ENABLE_MODEL_FILTER:
             if user.role == "user":
                 models["models"] = list(
@@ -180,6 +186,7 @@ async def get_ollama_tags(
                 return models
         return models
     else:
+        # 获取特定 URL 索引的 Ollama 标签
         url = app.state.OLLAMA_BASE_URLS[url_idx]
         try:
             r = requests.request(method="GET", url=f"{url}/api/tags")
@@ -188,7 +195,7 @@ async def get_ollama_tags(
             return r.json()
         except Exception as e:
             log.exception(e)
-            error_detail = "Open WebUI: Server Connection Error"
+            error_detail = "ToolAI: 服务器连接错误"
             if r is not None:
                 try:
                     res = r.json()
@@ -202,10 +209,55 @@ async def get_ollama_tags(
                 detail=error_detail,
             )
 
+# @app.get("/api/tags")
+# @app.get("/api/tags/{url_idx}")
+# async def get_ollama_tags(
+#     url_idx: Optional[int] = None, user=Depends(get_current_user)
+# ):
+#     if url_idx == None:
+#         models = await get_all_models()
+
+#         if app.state.ENABLE_MODEL_FILTER:
+#             if user.role == "user":
+#                 models["models"] = list(
+#                     filter(
+#                         lambda model: model["name"] in app.state.MODEL_FILTER_LIST,
+#                         models["models"],
+#                     )
+#                 )
+#                 return models
+#         return models
+#     else:
+#         url = app.state.OLLAMA_BASE_URLS[url_idx]
+#         try:
+#             r = requests.request(method="GET", url=f"{url}/api/tags")
+#             r.raise_for_status()
+
+#             return r.json()
+#         except Exception as e:
+#             log.exception(e)
+#             error_detail = "Open WebUI: Server Connection Error"
+#             if r is not None:
+#                 try:
+#                     res = r.json()
+#                     if "error" in res:
+#                         error_detail = f"Ollama: {res['error']}"
+#                 except:
+#                     error_detail = f"Ollama: {e}"
+
+#             raise HTTPException(
+#                 status_code=r.status_code if r else 500,
+#                 detail=error_detail,
+#             )
+
 
 @app.get("/api/version")
 @app.get("/api/version/{url_idx}")
 async def get_ollama_versions(url_idx: Optional[int] = None):
+
+    # 快速检测OLLAMA Server
+    # log.info(f"________________get_ollama_versions: {ERROR_MESSAGES.OLLAMA_NOT_FOUND}")
+    return {"version": "v1.0"}
 
     if url_idx == None:
 
@@ -237,7 +289,7 @@ async def get_ollama_versions(url_idx: Optional[int] = None):
             return r.json()
         except Exception as e:
             log.exception(e)
-            error_detail = "Open WebUI: Server Connection Error"
+            error_detail = "ToolAI: Server Connection Error"
             if r is not None:
                 try:
                     res = r.json()
@@ -312,7 +364,7 @@ async def pull_model(
 
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -383,7 +435,7 @@ async def push_model(
         return await run_in_threadpool(get_request)
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -448,7 +500,7 @@ async def create_model(
         return await run_in_threadpool(get_request)
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -500,7 +552,7 @@ async def copy_model(
         return True
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -547,7 +599,7 @@ async def delete_model(
         return True
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -585,7 +637,7 @@ async def show_model_info(form_data: ModelNameForm, user=Depends(get_current_use
         return r.json()
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -642,7 +694,7 @@ async def generate_embeddings(
         return r.json()
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -699,7 +751,7 @@ def generate_ollama_embeddings(
             raise "Something went wrong :/"
     except Exception as e:
         log.exception(e)
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -797,7 +849,7 @@ async def generate_completion(
     try:
         return await run_in_threadpool(get_request)
     except Exception as e:
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -937,6 +989,7 @@ class OpenAIChatCompletionForm(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+
 @app.post("/v1/chat/completions")
 @app.post("/v1/chat/completions/{url_idx}")
 async def generate_openai_chat_completion(
@@ -945,20 +998,27 @@ async def generate_openai_chat_completion(
     user=Depends(get_current_user),
 ):
 
+    print(" /v1/chat/completions generate_openai_chat_completion")
+    # 如果没有提供url_idx，则从form_data中获取model信息
     if url_idx == None:
         model = form_data.model
 
+        # 如果model中不包含冒号，则将其设为最新版本
         if ":" not in model:
             model = f"{model}:latest"
 
+        # 检查模型是否存在于应用程序状态中
         if model in app.state.MODELS:
+            # 从模型的URL列表中随机选择一个URL
             url_idx = random.choice(app.state.MODELS[model]["urls"])
         else:
+            # 如果模型不存在，则引发异常
             raise HTTPException(
                 status_code=400,
                 detail=ERROR_MESSAGES.MODEL_NOT_FOUND(form_data.model),
             )
 
+    # 获取选择的URL
     url = app.state.OLLAMA_BASE_URLS[url_idx]
     log.info(f"url: {url}")
 
@@ -968,6 +1028,7 @@ async def generate_openai_chat_completion(
         nonlocal form_data
         nonlocal r
 
+        # 生成唯一的请求ID
         request_id = str(uuid.uuid4())
         try:
             REQUEST_POOL.append(request_id)
@@ -975,10 +1036,12 @@ async def generate_openai_chat_completion(
             def stream_content():
                 try:
                     if form_data.stream:
+                        # 如果需要流式传输，则返回JSON格式的请求ID和状态
                         yield json.dumps(
                             {"request_id": request_id, "done": False}
                         ) + "\n"
 
+                    # 逐块获取响应内容并发送
                     for chunk in r.iter_content(chunk_size=8192):
                         if request_id in REQUEST_POOL:
                             yield chunk
@@ -991,6 +1054,7 @@ async def generate_openai_chat_completion(
                         if request_id in REQUEST_POOL:
                             REQUEST_POOL.remove(request_id)
 
+            # 发送POST请求，包含模型数据，并以流式传输方式处理响应
             r = requests.request(
                 method="POST",
                 url=f"{url}/v1/chat/completions",
@@ -1000,6 +1064,7 @@ async def generate_openai_chat_completion(
 
             r.raise_for_status()
 
+            # 返回流式响应
             return StreamingResponse(
                 stream_content(),
                 status_code=r.status_code,
@@ -1009,9 +1074,10 @@ async def generate_openai_chat_completion(
             raise e
 
     try:
+        # 在线程池中运行请求处理函数
         return await run_in_threadpool(get_request)
     except Exception as e:
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()
@@ -1020,10 +1086,100 @@ async def generate_openai_chat_completion(
             except:
                 error_detail = f"Ollama: {e}"
 
+        # 如果出现异常，则返回相应的HTTP异常
         raise HTTPException(
             status_code=r.status_code if r else 500,
             detail=error_detail,
         )
+
+
+# @app.post("/v1/chat/completions")
+# @app.post("/v1/chat/completions/{url_idx}")
+# async def generate_openai_chat_completion(
+#     form_data: OpenAIChatCompletionForm,
+#     url_idx: Optional[int] = None,
+#     user=Depends(get_current_user),
+# ):
+
+#     if url_idx == None:
+#         model = form_data.model
+
+#         if ":" not in model:
+#             model = f"{model}:latest"
+
+#         if model in app.state.MODELS:
+#             url_idx = random.choice(app.state.MODELS[model]["urls"])
+#         else:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail=ERROR_MESSAGES.MODEL_NOT_FOUND(form_data.model),
+#             )
+
+#     url = app.state.OLLAMA_BASE_URLS[url_idx]
+#     log.info(f"url: {url}")
+
+#     r = None
+
+#     def get_request():
+#         nonlocal form_data
+#         nonlocal r
+
+#         request_id = str(uuid.uuid4())
+#         try:
+#             REQUEST_POOL.append(request_id)
+
+#             def stream_content():
+#                 try:
+#                     if form_data.stream:
+#                         yield json.dumps(
+#                             {"request_id": request_id, "done": False}
+#                         ) + "\n"
+
+#                     for chunk in r.iter_content(chunk_size=8192):
+#                         if request_id in REQUEST_POOL:
+#                             yield chunk
+#                         else:
+#                             log.warning("User: canceled request")
+#                             break
+#                 finally:
+#                     if hasattr(r, "close"):
+#                         r.close()
+#                         if request_id in REQUEST_POOL:
+#                             REQUEST_POOL.remove(request_id)
+
+#             r = requests.request(
+#                 method="POST",
+#                 url=f"{url}/v1/chat/completions",
+#                 data=form_data.model_dump_json(exclude_none=True).encode(),
+#                 stream=True,
+#             )
+
+#             r.raise_for_status()
+
+#             return StreamingResponse(
+#                 stream_content(),
+#                 status_code=r.status_code,
+#                 headers=dict(r.headers),
+#             )
+#         except Exception as e:
+#             raise e
+
+#     try:
+#         return await run_in_threadpool(get_request)
+#     except Exception as e:
+#         error_detail = "Open WebUI: Server Connection Error"
+#         if r is not None:
+#             try:
+#                 res = r.json()
+#                 if "error" in res:
+#                     error_detail = f"Ollama: {res['error']}"
+#             except:
+#                 error_detail = f"Ollama: {e}"
+
+#         raise HTTPException(
+#             status_code=r.status_code if r else 500,
+#             detail=error_detail,
+#         )
 
 
 class UrlForm(BaseModel):
@@ -1321,7 +1477,7 @@ async def deprecated_proxy(path: str, request: Request, user=Depends(get_current
     try:
         return await run_in_threadpool(get_request)
     except Exception as e:
-        error_detail = "Open WebUI: Server Connection Error"
+        error_detail = "ToolAI: Server Connection Error"
         if r is not None:
             try:
                 res = r.json()

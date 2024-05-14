@@ -8,13 +8,23 @@ from typing import Union, Optional
 from constants import ERROR_MESSAGES
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+
 import requests
 import jwt
 import uuid
 import logging
 import config
+import pprint
+from apps.web.models.sqlserverutils import SQLServerConnection
+
 
 logging.getLogger("passlib").setLevel(logging.ERROR)
+
+# 填加
+from config import SRC_LOG_LEVELS
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 
 SESSION_SECRET = config.WEBUI_SECRET_KEY
@@ -74,16 +84,29 @@ def get_http_authorization_cred(auth_header: str):
         raise ValueError(ERROR_MESSAGES.INVALID_TOKEN)
 
 
+# 从jwt解码 根据id获取用户数据对象
 def get_current_user(
     auth_token: HTTPAuthorizationCredentials = Depends(bearer_security),
 ):
+    # log.error("bearer_security: %s", pprint.pformat(auth_token.credentials))
     # auth by api key
     if auth_token.credentials.startswith("sk-"):
         return get_current_user_by_api_key(auth_token.credentials)
+    
     # auth by jwt token
     data = decode_token(auth_token.credentials)
+    # log.info(f"data: {data}")
+    # log.info(f"data['id']: {data['id']}")
+    
     if data != None and "id" in data:
-        user = Users.get_user_by_id(data["id"])
+        
+        # user = Users.get_user_by_id(data["id"])
+        
+        # 打开SQLServer数据库连接
+        db = SQLServerConnection()
+        user = db.get_user_by_id(data["id"])
+        # log.info(f"get_current_user: {user}")
+
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -81,6 +81,7 @@ class ChatTable:
 
     def insert_new_chat(self, user_id: str, form_data: ChatForm) -> Optional[ChatModel]:
         id = str(uuid.uuid4())
+        print(f"_____insert_new_chat {user_id}  {form_data} {id}")
         chat = ChatModel(
             **{
                 "id": id,

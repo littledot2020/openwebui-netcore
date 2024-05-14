@@ -5,7 +5,8 @@
 	import { Toaster, toast } from 'svelte-sonner';
 
 	import { getBackendConfig } from '$lib/apis';
-	import { getSessionUser } from '$lib/apis/auths';
+	//import { getSessionUser } from '$lib/apis/auths';
+	import { getSessionUser } from '$lib/apis/authsNC';
 
 	import '../tailwind.css';
 	import '../app.css';
@@ -34,7 +35,7 @@
 			}
 
 			await WEBUI_NAME.set(backendConfig.name);
-			console.log(backendConfig);
+			// console.log(backendConfig);
 
 			if ($config) {
 				if (localStorage.token) {
@@ -50,10 +51,10 @@
 					} else {
 						// Redirect Invalid Session User to /auth Page
 						localStorage.removeItem('token');
-						await goto('/auth');
+						await goto('/authnow');
 					}
 				} else {
-					await goto('/auth');
+					await goto('/authnow');
 				}
 			}
 		} else {

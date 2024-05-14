@@ -79,6 +79,7 @@ from config import (
     RAG_EMBEDDING_MODEL_AUTO_UPDATE,
     RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE,
     ENABLE_RAG_HYBRID_SEARCH,
+    ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION,
     RAG_RERANKING_MODEL,
     PDF_EXTRACT_IMAGES,
     RAG_RERANKING_MODEL_AUTO_UPDATE,
@@ -104,6 +105,9 @@ app.state.TOP_K = RAG_TOP_K
 app.state.RELEVANCE_THRESHOLD = RAG_RELEVANCE_THRESHOLD
 
 app.state.ENABLE_RAG_HYBRID_SEARCH = ENABLE_RAG_HYBRID_SEARCH
+app.state.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
+    ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION
+)
 
 app.state.CHUNK_SIZE = CHUNK_SIZE
 app.state.CHUNK_OVERLAP = CHUNK_OVERLAP
@@ -298,7 +302,6 @@ async def update_reranking_config(
             detail=ERROR_MESSAGES.DEFAULT(e),
         )
 
-
 @app.get("/config")
 async def get_rag_config(user=Depends(get_admin_user)):
     return {
@@ -308,24 +311,74 @@ async def get_rag_config(user=Depends(get_admin_user)):
             "chunk_size": app.state.CHUNK_SIZE,
             "chunk_overlap": app.state.CHUNK_OVERLAP,
         },
+        "web_loader_ssl_verification": app.state.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION,
+        "youtube": {
+            "language": app.state.YOUTUBE_LOADER_LANGUAGE,
+            "translation": app.state.YOUTUBE_LOADER_TRANSLATION,
+        },
     }
+    
+# @app.get("/config")
+# async def get_rag_config(user=Depends(get_admin_user)):
+#     return {
+#         "status": True,
+#         "pdf_extract_images": app.state.PDF_EXTRACT_IMAGES,
+#         "chunk": {
+#             "chunk_size": app.state.CHUNK_SIZE,
+#             "chunk_overlap": app.state.CHUNK_OVERLAP,
+#         },
+#     }
 
 
 class ChunkParamUpdateForm(BaseModel):
     chunk_size: int
     chunk_overlap: int
 
+class YoutubeLoaderConfig(BaseModel):
+    language: List[str]
+    translation: Optional[str] = None
 
 class ConfigUpdateForm(BaseModel):
-    pdf_extract_images: bool
-    chunk: ChunkParamUpdateForm
-
+    pdf_extract_images: Optional[bool] = None
+    chunk: Optional[ChunkParamUpdateForm] = None
+    web_loader_ssl_verification: Optional[bool] = None
+    youtube: Optional[YoutubeLoaderConfig] = None
 
 @app.post("/config/update")
 async def update_rag_config(form_data: ConfigUpdateForm, user=Depends(get_admin_user)):
-    app.state.PDF_EXTRACT_IMAGES = form_data.pdf_extract_images
-    app.state.CHUNK_SIZE = form_data.chunk.chunk_size
-    app.state.CHUNK_OVERLAP = form_data.chunk.chunk_overlap
+    app.state.PDF_EXTRACT_IMAGES = (
+        form_data.pdf_extract_images
+        if form_data.pdf_extract_images != None
+        else app.state.PDF_EXTRACT_IMAGES
+    )
+
+    app.state.CHUNK_SIZE = (
+        form_data.chunk.chunk_size if form_data.chunk != None else app.state.CHUNK_SIZE
+    )
+
+    app.state.CHUNK_OVERLAP = (
+        form_data.chunk.chunk_overlap
+        if form_data.chunk != None
+        else app.state.CHUNK_OVERLAP
+    )
+
+    app.state.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
+        form_data.web_loader_ssl_verification
+        if form_data.web_loader_ssl_verification != None
+        else app.state.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION
+    )
+
+    app.state.YOUTUBE_LOADER_LANGUAGE = (
+        form_data.youtube.language
+        if form_data.youtube != None
+        else app.state.YOUTUBE_LOADER_LANGUAGE
+    )
+
+    app.state.YOUTUBE_LOADER_TRANSLATION = (
+        form_data.youtube.translation
+        if form_data.youtube != None
+        else app.state.YOUTUBE_LOADER_TRANSLATION
+    )
 
     return {
         "status": True,
@@ -334,7 +387,27 @@ async def update_rag_config(form_data: ConfigUpdateForm, user=Depends(get_admin_
             "chunk_size": app.state.CHUNK_SIZE,
             "chunk_overlap": app.state.CHUNK_OVERLAP,
         },
+        "web_loader_ssl_verification": app.state.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION,
+        "youtube": {
+            "language": app.state.YOUTUBE_LOADER_LANGUAGE,
+            "translation": app.state.YOUTUBE_LOADER_TRANSLATION,
+        },
     }
+
+# @app.post("/config/update")
+# async def update_rag_config(form_data: ConfigUpdateForm, user=Depends(get_admin_user)):
+#     app.state.PDF_EXTRACT_IMAGES = form_data.pdf_extract_images
+#     app.state.CHUNK_SIZE = form_data.chunk.chunk_size
+#     app.state.CHUNK_OVERLAP = form_data.chunk.chunk_overlap
+
+#     return {
+#         "status": True,
+#         "pdf_extract_images": app.state.PDF_EXTRACT_IMAGES,
+#         "chunk": {
+#             "chunk_size": app.state.CHUNK_SIZE,
+#             "chunk_overlap": app.state.CHUNK_OVERLAP,
+#         },
+#     }
 
 
 @app.get("/template")

@@ -1,36 +1,36 @@
 {
-	"version": 0,
-	"ui": {
-		"default_locale": "en-US",
-		"prompt_suggestions": [
-			{
-				"title": ["Help me study", "vocabulary for a college entrance exam"],
-				"content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option."
-			},
-			{
-				"title": ["Give me ideas", "for what to do with my kids' art"],
-				"content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-			},
-			{
-				"title": ["Tell me a fun fact", "about the Roman Empire"],
-				"content": "Tell me a random fun fact about the Roman Empire"
-			},
-			{
-				"title": ["Show me a code snippet", "of a website's sticky header"],
-				"content": "Show me a code snippet of a website's sticky header in CSS and JavaScript."
-			},
-			{
-				"title": ["Explain options trading", "if I'm familiar with buying and selling stocks"],
-				"content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks."
-			},
-			{
-				"title": ["Overcome procrastination", "give me tips"],
-				"content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?"
-			},
-			{
-				"title": ["Grammar check", "rewrite it for better readability "],
-				"content": "Check the following sentence for grammar and clarity: \"[sentence]\". Rewrite it for better readability while maintaining its original meaning."
-			}
-		]
-	}
+    "version": 0,
+    "ui": {
+        "default_locale": "zh-CN",
+        "prompt_suggestions": [
+            {
+                "title": ["帮助我学习", "为大学入学考试准备词汇"],
+                "content": "帮助我学习词汇：给我写一个句子，让我填空，我会尝试选择正确的选项。"
+            },
+            {
+                "title": ["给我一些想法", "如何处理孩子的艺术作品"],
+                "content": "我能用孩子的艺术作品做哪些有创意的事情？我不想把它们扔掉，但也不想让它们占据太多空间。"
+            },
+            {
+                "title": ["告诉我一个有趣的事实", "关于罗马帝国"],
+                "content": "告诉我一个关于罗马帝国的随机有趣事实。"
+            },
+            {
+                "title": ["展示一个网站粘性标题的代码片段"],
+                "content": "展示一个网站粘性标题的 CSS 和 JavaScript 代码片段。"
+            },
+            {
+                "title": ["解释期权交易", "如果我熟悉买卖股票"],
+                "content": "如果我熟悉买卖股票，用简单的语言解释期权交易。"
+            },
+            {
+                "title": ["克服拖延症", "给我一些建议"],
+                "content": "你能先问我我最经常拖延的时候，然后给我一些建议来克服拖延吗？"
+            },
+            {
+                "title": ["语法检查", "重写以提高可读性"],
+                "content": "检查以下句子的语法和清晰度：\"[sentence]\"。重写以提高可读性，同时保持原意。"
+            }
+        ]
+    }
 }

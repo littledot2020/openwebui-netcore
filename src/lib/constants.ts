@@ -1,8 +1,14 @@
 import { dev } from '$app/environment';
 // import { version } from '../../package.json';
 
-export const APP_NAME = 'Open WebUI';
-export const WEBUI_BASE_URL = dev ? `http://${location.hostname}:8080` : ``;
+export const APP_NAME = 'AI智慧学习室';
+//export const WEBUI_BASE_URL = dev ? `http://${location.hostname}:8080` : ``;
+//export const WEBUI_BASE_URL = dev ? `https://frp-now.top:62711` : ``;		//frp-now.top:62711
+export const WEBUI_BASE_URL = dev ? `http://192.168.1.8:8082` : ``;		//frp-now.top:62711
+
+// [c#]两次开发验证接口
+export const WEBUI_BASEAPI_URL = 'https://edu.toolai.io';	//http://127.0.0.1:5008
+export const WEBUI_BASEAPI_BASE_URL = `${WEBUI_BASEAPI_URL}/api/v1`;
 
 export const WEBUI_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1`;
 

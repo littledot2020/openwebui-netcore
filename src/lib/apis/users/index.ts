@@ -178,6 +178,6 @@ export const updateUserById = async (token: string, userId: string, user: UserUp
 	if (error) {
 		throw error;
 	}
-
+.0
 	return res;
 };

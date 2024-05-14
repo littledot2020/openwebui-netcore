@@ -8,6 +8,8 @@ import logging
 import aiohttp
 import requests
 
+import uvicorn
+
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi import HTTPException
@@ -54,6 +56,7 @@ from config import (
     SRC_LOG_LEVELS,
     WEBHOOK_URL,
     ENABLE_ADMIN_EXPORT,
+    OPENAI_API_KEY,
 )
 from constants import ERROR_MESSAGES
 
@@ -195,9 +198,10 @@ app.mount("/rag/api/v1", rag_app)
 async def get_app_config():
     # Checking and Handling the Absence of 'ui' in CONFIG_DATA
 
-    default_locale = "en-US"
+    default_locale = "zh-CN" # en-US
     if "ui" in CONFIG_DATA:
-        default_locale = CONFIG_DATA["ui"].get("default_locale", "en-US")
+        log.info(f"ui in CONFIG_DATA===========")
+        default_locale = CONFIG_DATA["ui"].get("default_locale", "zh-CN")   # en-US
 
     # The Rest of the Function Now Uses the Variables Defined Above
     return {

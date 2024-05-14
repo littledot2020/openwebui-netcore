@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { userSignIn, userSignUp } from '$lib/apis/auths';
+	import { userSignIn, userSignUp } from '$lib/apis/authsNC';
 	import Spinner from '$lib/components/common/Spinner.svelte';
 	import { WEBUI_API_BASE_URL, WEBUI_BASE_URL } from '$lib/constants';
 	import { WEBUI_NAME, config, user } from '$lib/stores';
@@ -14,7 +14,7 @@
 	let mode = 'signin';
 
 	let name = '';
-	let email = '';
+	let phone = '';
 	let password = '';
 
 	const setSessionUser = async (sessionUser) => {
@@ -28,7 +28,8 @@
 	};
 
 	const signInHandler = async () => {
-		const sessionUser = await userSignIn(email, password).catch((error) => {
+		//console.log(phone);
+		const sessionUser = await userSignIn(phone, password).catch((error) => {
 			toast.error(error);
 			return null;
 		});
@@ -37,12 +38,14 @@
 	};
 
 	const signUpHandler = async () => {
-		const sessionUser = await userSignUp(name, email, password, generateInitialsImage(name)).catch(
+		const sessionUser = await userSignUp(name, phone, password, generateInitialsImage(name)).catch(
 			(error) => {
 				toast.error(error);
 				return null;
 			}
 		);
+
+		console.log("signUpHandler ok");
 
 		await setSessionUser(sessionUser);
 	};
@@ -104,8 +107,8 @@
 					>
 						<div>
 							{$i18n.t('Signing in')}
-							{$i18n.t('to')}
-							{$WEBUI_NAME}
+							{$i18n.t('to')}222
+							{$WEBUI_NAME} 33333333
 						</div>
 
 						<div>
@@ -154,13 +157,12 @@
 							{/if}
 
 							<div class="mb-2">
-								<div class=" text-sm font-semibold text-left mb-1">31{$i18n.t('Email')}</div>
+								<div class=" text-sm font-semibold text-left mb-1">{$i18n.t('Phone')}</div>
 								<input
-									bind:value={email}
-									type="email"
-									class=" border px-4 py-2.5 rounded-2xl w-full text-sm"
-									autocomplete="email"
-									placeholder={$i18n.t('Enter Your Email')}
+									bind:value={phone}
+									type="phone"
+									class=" border px-4 py-2.5 rounded-2xl w-full text-sm"									
+									placeholder={$i18n.t('Enter Your Phone')}
 									required
 								/>
 							</div>

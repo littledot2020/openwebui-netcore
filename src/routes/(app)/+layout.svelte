@@ -67,7 +67,7 @@
 
 	onMount(async () => {
 		if ($user === undefined) {
-			await goto('/auth');
+			await goto('/authnow');
 		} else if (['user', 'admin'].includes($user.role)) {
 			try {
 				// Check if IndexedDB exists
@@ -208,13 +208,18 @@
 						<div class="m-auto pb-44 flex flex-col justify-center">
 							<div class="max-w-md">
 								<div class="text-center dark:text-white text-2xl font-medium z-50">
-									Account Activation Pending<br /> Contact Admin for WebUI Access
+									<!-- Account Activation Pending -->
+									账户需要激活
+									<br />
+									联系管理员进行处理
+									<!-- Contact Admin for WebUI Access -->
 								</div>
 
 								<div class=" mt-4 text-center text-sm dark:text-gray-200 w-full">
-									Your account status is currently pending activation. To access the WebUI, please
+									<!-- Your account status is currently pending activation. To access the WebUI, please
 									reach out to the administrator. Admins can manage user statuses from the Admin
-									Panel.
+									Panel. -->
+									您的账户状态目前正在等待激活。要访问WebUI，请联系管理员。管理员可以从管理面板管理用户状态。
 								</div>
 
 								<div class=" mt-6 mx-auto relative group w-fit">
@@ -231,7 +236,7 @@
 										class="text-xs text-center w-full mt-2 text-gray-400 underline"
 										on:click={async () => {
 											localStorage.removeItem('token');
-											location.href = '/auth';
+											location.href = '/authnow';
 										}}>{$i18n.t('Sign Out')}</button
 									>
 								</div>

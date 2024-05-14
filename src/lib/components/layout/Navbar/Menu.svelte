@@ -157,7 +157,8 @@
 							/>
 						</svg>
 
-						<div class="flex items-center">{$i18n.t('Download')}</div>
+						<!-- <div class="flex items-center">{$i18n.t('Download')}</div> -->
+						<div class="flex items-center">{$i18n.t('Download Chat Record')}</div>
 					</DropdownMenu.SubTrigger>
 					<DropdownMenu.SubContent
 						class="w-full rounded-lg px-1 py-1.5 border border-gray-300/30 dark:border-gray-700/50 z-50 bg-white dark:bg-gray-900 dark:text-white shadow-lg"

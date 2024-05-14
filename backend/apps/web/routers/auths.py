@@ -9,6 +9,10 @@ import re
 import uuid
 import csv
 
+from config import SRC_LOG_LEVELS
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 from apps.web.models.auths import (
     SigninForm,
@@ -103,13 +107,30 @@ async def update_password(
 ############################
 
 
+
+# 定义用于认证用户的登录端点
 @router.post("/signin", response_model=SigninResponse)
 async def signin(request: Request, form_data: SigninForm):
+    """
+    用于认证用户的登录端点。
+    
+    参数:
+    - request (Request): 传入的HTTP请求对象。
+    - form_data (SigninForm): 提交的登录表单数据。
+    
+    返回:
+    - SigninResponse: 包含用户令牌和信息的响应模型，如果认证成功。
+    """
+    # 检查是否配置了信任的电子邮件标头
     if WEBUI_AUTH_TRUSTED_EMAIL_HEADER:
+        # 验证请求中是否存在信任的电子邮件标头
         if WEBUI_AUTH_TRUSTED_EMAIL_HEADER not in request.headers:
             raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_TRUSTED_HEADER)
 
+        # 从请求标头中提取和规范化信任的电子邮件
         trusted_email = request.headers[WEBUI_AUTH_TRUSTED_EMAIL_HEADER].lower()
+        
+        # 如果不存在具有信任电子邮件的用户，则注册一个新用户
         if not Users.get_user_by_email(trusted_email.lower()):
             await signup(
                 request,
@@ -117,16 +138,23 @@ async def signin(request: Request, form_data: SigninForm):
                     email=trusted_email, password=str(uuid.uuid4()), name=trusted_email
                 ),
             )
+        
+        # 使用信任的电子邮件标头对用户进行认证
         user = Auths.authenticate_user_by_trusted_header(trusted_email)
+        log.info("使用信任的电子邮件标头对用户进行认证")
     else:
+        # 使用表单数据中的电子邮件和密码对用户进行认证
         user = Auths.authenticate_user(form_data.email.lower(), form_data.password)
+        log.info("使用表单数据中的电子邮件和密码对用户进行认证")
 
+    # 为经过身份验证的用户生成令牌
     if user:
         token = create_token(
             data={"id": user.id},
             expires_delta=parse_duration(request.app.state.JWT_EXPIRES_IN),
         )
 
+        # 如果认证成功，则返回用户令牌和信息
         return {
             "token": token,
             "token_type": "Bearer",
@@ -137,7 +165,44 @@ async def signin(request: Request, form_data: SigninForm):
             "profile_image_url": user.profile_image_url,
         }
     else:
+        # 如果认证失败，则引发异常
         raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
+
+# @router.post("/signin", response_model=SigninResponse)
+# async def signin(request: Request, form_data: SigninForm):
+#     if WEBUI_AUTH_TRUSTED_EMAIL_HEADER:
+#         if WEBUI_AUTH_TRUSTED_EMAIL_HEADER not in request.headers:
+#             raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_TRUSTED_HEADER)
+
+#         trusted_email = request.headers[WEBUI_AUTH_TRUSTED_EMAIL_HEADER].lower()
+#         if not Users.get_user_by_email(trusted_email.lower()):
+#             await signup(
+#                 request,
+#                 SignupForm(
+#                     email=trusted_email, password=str(uuid.uuid4()), name=trusted_email
+#                 ),
+#             )
+#         user = Auths.authenticate_user_by_trusted_header(trusted_email)
+#     else:
+#         user = Auths.authenticate_user(form_data.email.lower(), form_data.password)
+
+#     if user:
+#         token = create_token(
+#             data={"id": user.id},
+#             expires_delta=parse_duration(request.app.state.JWT_EXPIRES_IN),
+#         )
+
+#         return {
+#             "token": token,
+#             "token_type": "Bearer",
+#             "id": user.id,
+#             "email": user.email,
+#             "name": user.name,
+#             "role": user.role,
+#             "profile_image_url": user.profile_image_url,
+#         }
+#     else:
+#         raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
 
 
 ############################
@@ -147,20 +212,24 @@ async def signin(request: Request, form_data: SigninForm):
 
 @router.post("/signup", response_model=SigninResponse)
 async def signup(request: Request, form_data: SignupForm):
+    # 检查是否允许注册
     if not request.app.state.ENABLE_SIGNUP:
         raise HTTPException(
             status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.ACCESS_PROHIBITED
         )
 
+    # 验证邮箱格式
     if not validate_email_format(form_data.email.lower()):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, detail=ERROR_MESSAGES.INVALID_EMAIL_FORMAT
         )
 
+    # 检查邮箱是否已被注册
     if Users.get_user_by_email(form_data.email.lower()):
         raise HTTPException(400, detail=ERROR_MESSAGES.EMAIL_TAKEN)
 
     try:
+        # 确定用户角色
         role = (
             "admin"
             if Users.get_num_users() == 0
@@ -180,6 +249,8 @@ async def signup(request: Request, form_data: SignupForm):
                 data={"id": user.id},
                 expires_delta=parse_duration(request.app.state.JWT_EXPIRES_IN),
             )
+            
+            # 设置 Cookie
             # response.set_cookie(key='token', value=token, httponly=True)
 
             if request.app.state.WEBHOOK_URL:
@@ -206,6 +277,68 @@ async def signup(request: Request, form_data: SignupForm):
             raise HTTPException(500, detail=ERROR_MESSAGES.CREATE_USER_ERROR)
     except Exception as err:
         raise HTTPException(500, detail=ERROR_MESSAGES.DEFAULT(err))
+
+# @router.post("/signup", response_model=SigninResponse)
+# async def signup(request: Request, form_data: SignupForm):
+#     if not request.app.state.ENABLE_SIGNUP:
+#         raise HTTPException(
+#             status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.ACCESS_PROHIBITED
+#         )
+
+#     if not validate_email_format(form_data.email.lower()):
+#         raise HTTPException(
+#             status.HTTP_400_BAD_REQUEST, detail=ERROR_MESSAGES.INVALID_EMAIL_FORMAT
+#         )
+
+#     if Users.get_user_by_email(form_data.email.lower()):
+#         raise HTTPException(400, detail=ERROR_MESSAGES.EMAIL_TAKEN)
+
+#     try:
+#         role = (
+#             "admin"
+#             if Users.get_num_users() == 0
+#             else request.app.state.DEFAULT_USER_ROLE
+#         )
+#         hashed = get_password_hash(form_data.password)
+#         user = Auths.insert_new_auth(
+#             form_data.email.lower(),
+#             hashed,
+#             form_data.name,
+#             form_data.profile_image_url,
+#             role,
+#         )
+
+#         if user:
+#             token = create_token(
+#                 data={"id": user.id},
+#                 expires_delta=parse_duration(request.app.state.JWT_EXPIRES_IN),
+#             )
+#             # response.set_cookie(key='token', value=token, httponly=True)
+
+#             if request.app.state.WEBHOOK_URL:
+#                 post_webhook(
+#                     request.app.state.WEBHOOK_URL,
+#                     WEBHOOK_MESSAGES.USER_SIGNUP(user.name),
+#                     {
+#                         "action": "signup",
+#                         "message": WEBHOOK_MESSAGES.USER_SIGNUP(user.name),
+#                         "user": user.model_dump_json(exclude_none=True),
+#                     },
+#                 )
+
+#             return {
+#                 "token": token,
+#                 "token_type": "Bearer",
+#                 "id": user.id,
+#                 "email": user.email,
+#                 "name": user.name,
+#                 "role": user.role,
+#                 "profile_image_url": user.profile_image_url,
+#             }
+#         else:
+#             raise HTTPException(500, detail=ERROR_MESSAGES.CREATE_USER_ERROR)
+#     except Exception as err:
+#         raise HTTPException(500, detail=ERROR_MESSAGES.DEFAULT(err))
 
 
 ############################

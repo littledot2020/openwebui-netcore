@@ -1,0 +1,9 @@
+Looking in indexes: https://pypi.tuna.tsinghua.edu.cn/simple
+Collecting cryptography
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/7b/4e/fa4896744259ee8602464ed2c7330b736cc4dd3fd92f63cd56828bf36707/cryptography-42.0.7-cp39-abi3-manylinux_2_28_x86_64.whl (3.8 MB)
+Collecting cffi>=1.12 (from cryptography)
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/9b/89/a31c81e36bbb793581d8bba4406a8aac4ba84b2559301c44eef81f4cf5df/cffi-1.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (464 kB)
+Collecting pycparser (from cffi>=1.12->cryptography)
+  Using cached https://pypi.tuna.tsinghua.edu.cn/packages/13/a3/a812df4e2dd5696d1f351d58b8fe16a405b234ad2886a0dab9183fb78109/pycparser-2.22-py3-none-any.whl (117 kB)
+Installing collected packages: pycparser, cffi, cryptography
+Successfully installed cffi-1.16.0 cryptography-42.0.7 pycparser-2.22

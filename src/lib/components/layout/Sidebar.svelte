@@ -782,7 +782,7 @@
 									class="flex rounded-md py-2.5 px-3.5 w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 									on:click={() => {
 										localStorage.removeItem('token');
-										location.href = '/auth';
+										location.href = '/authnow';
 										showDropdown = false;
 									}}
 								>

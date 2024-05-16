@@ -76,7 +76,7 @@
 							showChangelog.set(true);
 						}}
 					>
-						<div>{$i18n.t("See what's new")}</div>
+						<div>{$i18n.t("See what's new")}11</div>
 					</button>
 				</div>
 

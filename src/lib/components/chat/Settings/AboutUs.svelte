@@ -30,7 +30,7 @@
 		console.log(version);
 
 		updateAvailable = compareVersion(version.latest, version.current);
-		console.log(updateAvailable);
+		//console.log(updateAvailable);
 	};
 
 	onMount(async () => {
@@ -47,13 +47,13 @@
 		<div>
 			<div class=" mb-2.5 text-sm font-medium flex space-x-2 items-center">
 				<div>
-					{$WEBUI_NAME}
-					{$i18n.t('Version')}
+					{$WEBUI_NAME} 
+					<!-- {$i18n.t('Version')} -->
 				</div>
 			</div>
 			<div class="flex w-full justify-between items-center">
 				<div class="flex flex-col text-xs text-gray-700 dark:text-gray-200">
-					<div class="flex gap-1">
+					<!-- <div class="flex gap-1">
 						<Tooltip content={WEBUI_VERSION === '0.1.117' ? "🪖 We're just getting started." : ''}>
 							v{WEBUI_VERSION}
 						</Tooltip>
@@ -68,16 +68,16 @@
 								? `(v${version.latest} ${$i18n.t('available!')})`
 								: $i18n.t('(latest)')}
 						</a>
-					</div>
+					</div> -->
 
-					<button
+					<!-- <button
 						class=" underline flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-500"
 						on:click={() => {
 							showChangelog.set(true);
 						}}
 					>
 						<div>{$i18n.t("See what's new")}</div>
-					</button>
+					</button> -->
 				</div>
 
 				<!-- <button
@@ -147,7 +147,7 @@
 				<span class=" text-gray-500 dark:text-gray-300 font-medium">{$WEBUI_NAME}</span> -
 			{/if} -->
 			<!-- {$i18n.t('Created by')} -->
-			版权所有
+			版权所有 2023-2024
 			<a
 				class=" text-gray-500 dark:text-gray-300 font-medium"
 				href="https://edu.toolai.io"

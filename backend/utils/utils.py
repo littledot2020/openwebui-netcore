@@ -60,10 +60,13 @@ def create_token(data: dict, expires_delta: Union[timedelta, None] = None) -> st
 
 
 def decode_token(token: str) -> Optional[dict]:
+    log.info(f"decode_token decoded: {SESSION_SECRET}")
     try:
         decoded = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
+        log.info(f"decode_token decoded: {decoded}")
         return decoded
     except Exception as e:
+        log.error(f"decode_token error: {e}")
         return None
 
 
@@ -93,9 +96,11 @@ def get_current_user(
     if auth_token.credentials.startswith("sk-"):
         return get_current_user_by_api_key(auth_token.credentials)
     
+    log.info(f"auth_token: {auth_token}")
+    log.info(f"auth_token.credentials: {auth_token.credentials}")
     # auth by jwt token
     data = decode_token(auth_token.credentials)
-    # log.info(f"data: {data}")
+    log.info(f"data: {data}")
     # log.info(f"data['id']: {data['id']}")
     
     if data != None and "id" in data:

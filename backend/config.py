@@ -19,6 +19,18 @@ from constants import ERROR_MESSAGES
 
 
 ####################################
+# Load .env file
+####################################
+
+try:
+    from dotenv import load_dotenv, find_dotenv
+
+    load_dotenv(find_dotenv("../.env"))
+except ImportError:
+    print("dotenv not installed, skipping...")
+
+
+####################################
 # LOGGING
 ####################################
 
@@ -59,22 +71,15 @@ for source in log_sources:
 
 log.setLevel(SRC_LOG_LEVELS["CONFIG"])
 
-####################################
-# Load .env file
-####################################
 
-try:
-    from dotenv import load_dotenv, find_dotenv
+WEBUI_NAME = os.environ.get("WEBUI_NAME", "AI智慧学习教室")
+if WEBUI_NAME != "AI智慧学习教室":
+    WEBUI_NAME += " (AI智慧学习教室)"
 
-    load_dotenv(find_dotenv("../.env"))
-except ImportError:
-    log.warning("dotenv not installed, skipping...")
-
-WEBUI_NAME = os.environ.get("WEBUI_NAME", "AI智学室")
-if WEBUI_NAME != "AI智学室":
-    WEBUI_NAME += " (AI智学室)"
+WEBUI_URL = os.environ.get("WEBUI_URL", "http://localhost:3000")
 
 WEBUI_FAVICON_URL = "https://openwebui.com/favicon.png"
+
 
 ####################################
 # ENV (dev,test,prod)
@@ -148,6 +153,22 @@ for version in soup.find_all("h2"):
 
 
 CHANGELOG = changelog_json
+
+####################################
+# WEBUI_VERSION
+####################################
+
+WEBUI_VERSION = os.environ.get("WEBUI_VERSION", "v1.0.0-alpha.100")
+
+####################################
+# WEBUI_AUTH (Required for security)
+####################################
+
+WEBUI_AUTH = os.environ.get("WEBUI_AUTH", "True").lower() == "true"
+WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get(
+    "WEBUI_AUTH_TRUSTED_EMAIL_HEADER", None
+)
+
 
 ####################################
 # DATA/FRONTEND BUILD DIR
@@ -304,11 +325,11 @@ OLLAMA_BASE_URLS = [url.strip() for url in OLLAMA_BASE_URLS.split(";")]
 ####################################
 
 # 代理服务器的地址和端口
-LOCAL_PROXY = os.getenv("https_proxy", "http://192.168.1.2:10809")
+LOCAL_PROXY = os.getenv("https_proxy", "")
 
 # 从环境变量中获取代理服务器地址和端口，如果不存在则默认使用指定的地址和端口
-_http_proxy = os.getenv("http_proxy", "http://192.168.1.2:10809")
-_https_proxy = os.getenv("https_proxy", "http://192.168.1.2:10809")
+_http_proxy = os.getenv("http_proxy", "")
+_https_proxy = os.getenv("https_proxy", "")
 
 # 构建代理服务器字典
 LOCAL_PROXYS = {
@@ -316,13 +337,9 @@ LOCAL_PROXYS = {
     'https': _https_proxy
 }
 
-
-
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")    ##--## KEY
-log.info(f"________OPENAI_API_KEY________: {OPENAI_API_KEY}")
-
 OPENAI_API_BASE_URL = os.environ.get("OPENAI_API_BASE_URL", "")
-
+log.info(f"________OPENAI_API_KEY________: {OPENAI_API_KEY}")
 
 if OPENAI_API_BASE_URL == "":
     OPENAI_API_BASE_URL = "https://api.openai.com/v1"
@@ -330,7 +347,6 @@ if OPENAI_API_BASE_URL == "":
 OPENAI_API_KEYS = os.environ.get("OPENAI_API_KEYS", "")
 OPENAI_API_KEYS = OPENAI_API_KEYS if OPENAI_API_KEYS != "" else OPENAI_API_KEY
 log.info(f"________OPENAI_API_KEYS: {OPENAI_API_KEYS}")
-
 OPENAI_API_KEYS = [url.strip() for url in OPENAI_API_KEYS.split(";")]
 
 
@@ -360,8 +376,11 @@ OPENAI_API_BASE_URL = "https://api.openai.com/v1"
 # WEBUI
 ####################################
 
-ENABLE_SIGNUP = os.environ.get("ENABLE_SIGNUP", "True").lower() == "true"
-# DEFAULT_MODELS = os.environ.get("DEFAULT_MODELS", None)
+ENABLE_SIGNUP = (
+    False
+    if WEBUI_AUTH == False
+    else os.environ.get("ENABLE_SIGNUP", "True").lower() == "true"
+)
 DEFAULT_MODELS = os.environ.get("DEFAULT_MODELS", "gpt-4-vision-preview")
 
 
@@ -388,7 +407,10 @@ DEFAULT_PROMPT_SUGGESTIONS = (
             "content": "展示一个网站粘性标题的 CSS 和 JavaScript 代码片段。"
         },
         {
-            "title": ["解释期权交易", "如果我熟悉买卖股票"],
+            "title": [
+                "解释期权交易", 
+                "如果我熟悉买卖股票"
+            ],
             "content": "如果我熟悉买卖股票，用简单的语言解释期权交易。"
         },
         {
@@ -396,37 +418,6 @@ DEFAULT_PROMPT_SUGGESTIONS = (
             "content": "你能先问我我最经常拖延的时候，然后给我一些建议来克服拖延吗？"
         }
     ]
-    
-    
-    # else [
-    #     {
-    #         "title": ["Help me study", "vocabulary for a college entrance exam"],
-    #         "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
-    #     },
-    #     {
-    #         "title": ["Give me ideas", "for what to do with my kids' art"],
-    #         "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
-    #     },
-    #     {
-    #         "title": ["Tell me a fun fact", "about the Roman Empire"],
-    #         "content": "Tell me a random fun fact about the Roman Empire",
-    #     },
-    #     {
-    #         "title": ["Show me a code snippet", "of a website's sticky header"],
-    #         "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
-    #     },
-    #     {
-    #         "title": [
-    #             "Explain options trading",
-    #             "if I'm familiar with buying and selling stocks",
-    #         ],
-    #         "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
-    #     },
-    #     {
-    #         "title": ["Overcome procrastination", "give me tips"],
-    #         "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
-    #     },
-    # ]
 )
 
 
@@ -447,21 +438,6 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
 ENABLE_ADMIN_EXPORT = os.environ.get("ENABLE_ADMIN_EXPORT", "True").lower() == "true"
 
 ####################################
-# WEBUI_VERSION
-####################################
-
-WEBUI_VERSION = os.environ.get("WEBUI_VERSION", "v1.0.0-alpha.100")
-
-####################################
-# WEBUI_AUTH (Required for security)
-####################################
-
-WEBUI_AUTH = True
-WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get(
-    "WEBUI_AUTH_TRUSTED_EMAIL_HEADER", None
-)
-
-####################################
 # WEBUI_SECRET_KEY
 ####################################
 
@@ -471,8 +447,6 @@ WEBUI_SECRET_KEY = os.environ.get(
         "WEBUI_JWT_SECRET_KEY", "qP1yR9qH2xS0Vw2lA3gI4nF0zA7fA3hB"
     ),  # DEPRECATED: remove at next major version
 )
-
-log.info(f"WEBUI_JWT_SECRET_KEY: {WEBUI_SECRET_KEY}")
 
 if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
     raise ValueError(ERROR_MESSAGES.ENV_VAR_NOT_FOUND)
@@ -503,6 +477,7 @@ RAG_RELEVANCE_THRESHOLD = float(os.environ.get("RAG_RELEVANCE_THRESHOLD", "0.0")
 ENABLE_RAG_HYBRID_SEARCH = (
     os.environ.get("ENABLE_RAG_HYBRID_SEARCH", "").lower() == "true"
 )
+
 
 ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
     os.environ.get("ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION", "True").lower() == "true"
@@ -537,13 +512,6 @@ RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = (
     os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "").lower() == "true"
 )
 
-# device type embedding models - "cpu" (default), "cuda" (nvidia gpu required) or "mps" (apple silicon) - choosing this right can lead to better performance
-USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")
-
-if USE_CUDA.lower() == "true":
-    DEVICE_TYPE = "cuda"
-else:
-    DEVICE_TYPE = "cpu"
 
 if CHROMA_HTTP_HOST != "":
     CHROMA_CLIENT = chromadb.HttpClient(
@@ -562,6 +530,16 @@ else:
         tenant=CHROMA_TENANT,
         database=CHROMA_DATABASE,
     )
+
+
+# device type embedding models - "cpu" (default), "cuda" (nvidia gpu required) or "mps" (apple silicon) - choosing this right can lead to better performance
+USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")
+
+if USE_CUDA.lower() == "true":
+    DEVICE_TYPE = "cuda"
+else:
+    DEVICE_TYPE = "cpu"
+
 
 CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE", "1500"))
 CHUNK_OVERLAP = int(os.environ.get("CHUNK_OVERLAP", "100"))
@@ -585,7 +563,11 @@ RAG_TEMPLATE = os.environ.get("RAG_TEMPLATE", DEFAULT_RAG_TEMPLATE)
 RAG_OPENAI_API_BASE_URL = os.getenv("RAG_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL)
 RAG_OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY", OPENAI_API_KEY)
 
-ENABLE_LOCAL_WEB_FETCH = os.getenv("ENABLE_LOCAL_WEB_FETCH", "False").lower() == "true"
+ENABLE_RAG_LOCAL_WEB_FETCH = (
+    os.getenv("ENABLE_RAG_LOCAL_WEB_FETCH", "False").lower() == "true"
+)
+
+YOUTUBE_LOADER_LANGUAGE = os.getenv("YOUTUBE_LOADER_LANGUAGE", "en").split(",")
 
 ####################################
 # Transcribe
@@ -628,6 +610,8 @@ IMAGE_GENERATION_MODEL = os.getenv("IMAGE_GENERATION_MODEL", "")
 
 AUDIO_OPENAI_API_BASE_URL = os.getenv("AUDIO_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL)
 AUDIO_OPENAI_API_KEY = os.getenv("AUDIO_OPENAI_API_KEY", OPENAI_API_KEY)
+AUDIO_OPENAI_API_MODEL = os.getenv("AUDIO_OPENAI_API_MODEL", "tts-1")
+AUDIO_OPENAI_API_VOICE = os.getenv("AUDIO_OPENAI_API_VOICE", "alloy")
 
 ####################################
 # LiteLLM
@@ -636,12 +620,10 @@ AUDIO_OPENAI_API_KEY = os.getenv("AUDIO_OPENAI_API_KEY", OPENAI_API_KEY)
 
 ENABLE_LITELLM = os.environ.get("ENABLE_LITELLM", "True").lower() == "true"
 
-LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14366"))
-# LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14365"))
+LITELLM_PROXY_PORT = int(os.getenv("LITELLM_PROXY_PORT", "14365"))
 if LITELLM_PROXY_PORT < 0 or LITELLM_PROXY_PORT > 65535:
     raise ValueError("Invalid port number for LITELLM_PROXY_PORT")
 LITELLM_PROXY_HOST = os.getenv("LITELLM_PROXY_HOST", "127.0.0.1")
-# LITELLM_PROXY_HOST = os.getenv("LITELLM_PROXY_HOST", "127.0.0.1")
 
 
 ####################################

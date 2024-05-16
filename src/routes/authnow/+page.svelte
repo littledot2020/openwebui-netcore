@@ -106,9 +106,9 @@
 						class="flex items-center justify-center gap-3 text-xl sm:text-2xl text-center font-bold dark:text-gray-200"
 					>
 						<div>
-							{$i18n.t('Signing in')}
-							{$i18n.t('to')}222
-							{$WEBUI_NAME} 33333333
+							<!-- {$i18n.t('Signing in')}
+							{$i18n.t('to')} -->
+							{$WEBUI_NAME} 
 						</div>
 
 						<div>
@@ -125,8 +125,8 @@
 						}}
 					>
 						<div class=" text-xl sm:text-2xl font-bold">
-							{mode === 'signin' ? $i18n.t('Sign in') : $i18n.t('Sign up')}
-							{$i18n.t('to')}
+							<!-- {mode === 'signin' ? $i18n.t('Sign in') : $i18n.t('Sign up')}
+							{$i18n.t('to')} -->
 							{$WEBUI_NAME}
 						</div>
 
